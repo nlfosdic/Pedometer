@@ -19,7 +19,6 @@ buildscript {
 apply plugin: 'com.android.application'
 
 android {
-
     if (rootProject.ext.has("compileSdkVersion")) {
         compileSdkVersion rootProject.ext.compileSdkVersion
         buildToolsVersion rootProject.ext.buildToolsVersion
@@ -28,17 +27,13 @@ android {
         compileSdkVersion = 27
         buildToolsVersion = "27.0.1"
     }
-
     defaultConfig {
         applicationId "de.j4velin.pedometer"
     }
-
     signingConfigs {
         release
     }
-
     flavorDimensions "main"
-
     productFlavors {
         play {
             dimension "main"
@@ -47,7 +42,6 @@ android {
             dimension "main"
         }
     }
-
     buildTypes {
         release {
             signingConfig signingConfigs.release
@@ -63,6 +57,7 @@ android {
             minifyEnabled false
         }
     }
+    compileSdkVersion 25
 }
 
 repositories {

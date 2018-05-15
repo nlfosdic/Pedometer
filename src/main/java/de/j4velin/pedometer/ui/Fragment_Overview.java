@@ -46,6 +46,7 @@ import org.eazegraph.lib.models.PieModel;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -129,7 +130,7 @@ public class Fragment_Overview extends Fragment implements SensorEventListener {
             SensorManager sm =
                     (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
             Sensor sensor = sm.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-            if (sensor == null) {
+            /*if (sensor == null) {
                 new AlertDialog.Builder(getActivity()).setTitle(R.string.no_sensor)
                         .setMessage(R.string.no_sensor_explain)
                         .setOnDismissListener(new DialogInterface.OnDismissListener() {
@@ -146,7 +147,7 @@ public class Fragment_Overview extends Fragment implements SensorEventListener {
                         }).create().show();
             } else {
                 sm.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI, 0);
-            }
+            }*/
         }
 
         since_boot -= pauseDifference;
@@ -340,6 +341,7 @@ public class Fragment_Overview extends Fragment implements SensorEventListener {
                     .equals("cm");
         }
         barChart.setShowDecimal(!showSteps); // show decimal in distance view only
+        barChart.setShowValues(true);
         BarModel bm;
         Database db = Database.getInstance(getActivity());
         List<Pair<Long, Integer>> last = db.getLastEntries(8);
@@ -365,11 +367,92 @@ public class Fragment_Overview extends Fragment implements SensorEventListener {
                 barChart.addBar(bm);
             }
         }
-        if (barChart.getData().size() > 0) {
+        /*if (barChart.getData().size() > 0) {
             barChart.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(final View v) {
                     Dialog_Statistics.getDialog(getActivity(), since_boot).show();
+                }
+            });
+            barChart.startAnimation();
+        } else {
+            barChart.setVisibility(View.GONE);
+        }*/
+        if (barChart.getData().size() > 0) {
+            barChart.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(final View v) {
+                    updateBarsHistory();
+                }
+            });
+            barChart.startAnimation();
+        } else {
+            barChart.setVisibility(View.GONE);
+        }
+    }
+
+
+
+
+    private void updateBarsHistory() {
+        SimpleDateFormat df = new SimpleDateFormat("", Locale.getDefault());
+        BarChart barChart = (BarChart) getView().findViewById(R.id.bargraph);
+        if (barChart.getData().size() > 0) barChart.clearChart();
+        int steps;
+        float distance, stepsize = Fragment_Settings.DEFAULT_STEP_SIZE;
+        boolean stepsize_cm = true;
+        if (!showSteps) {
+            // load some more settings if distance is needed
+            SharedPreferences prefs =
+                    getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE);
+            stepsize = prefs.getFloat("stepsize_value", Fragment_Settings.DEFAULT_STEP_SIZE);
+            stepsize_cm = prefs.getString("stepsize_unit", Fragment_Settings.DEFAULT_STEP_UNIT)
+                    .equals("cm");
+        }
+        //barChart.setShowDecimal(!showSteps); // show decimal in distance view only
+        barChart.setShowValues(false);
+        BarModel bm;
+        Database db = Database.getInstance(getActivity());
+        List<Pair<Long, Integer>> last = db.getLastEntries(db.getDays());
+        db.close();
+        for (int i = last.size() - 1; i > 0; i--) {
+            Pair<Long, Integer> current = last.get(i);
+            steps = current.second;
+            if (steps > 0) {
+                Date date = new Date(current.first);
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(date);
+                int month = cal.get(Calendar.MONTH);
+                switch (month) {
+                    case 1:
+                    case 3:
+                    case 5:
+                    case 7:
+                    case 9:
+                    case 11: bm = new BarModel(df.format(date), 0, Color.parseColor("#E3010F")); break;
+                    default: bm = new BarModel(df.format(date), 0, Color.parseColor("#2A09CC")); break;
+                }
+
+                if (showSteps) {
+                    bm.setValue(steps);
+                } else {
+                    distance = steps * stepsize;
+                    if (stepsize_cm) {
+                        distance /= 100000;
+                    } else {
+                        distance /= 5280;
+                    }
+                    distance = Math.round(distance * 1000) / 1000f; // 3 decimals
+                    bm.setValue(distance);
+                }
+                barChart.addBar(bm);
+            }
+        }
+        if (barChart.getData().size() > 0) {
+            barChart.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(final View v) {
+                    updateBars();
                 }
             });
             barChart.startAnimation();
