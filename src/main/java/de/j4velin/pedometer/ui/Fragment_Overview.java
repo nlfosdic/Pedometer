@@ -58,6 +58,8 @@ import de.j4velin.pedometer.SensorListener;
 import de.j4velin.pedometer.util.Logger;
 import de.j4velin.pedometer.util.Util;
 
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+
 public class Fragment_Overview extends Fragment implements SensorEventListener {
 
     private TextView stepsView, totalView, averageView;
@@ -78,32 +80,36 @@ public class Fragment_Overview extends Fragment implements SensorEventListener {
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
                              final Bundle savedInstanceState) {
+
         final View v = inflater.inflate(R.layout.fragment_overview, null);
-        stepsView = (TextView) v.findViewById(R.id.steps);
-        totalView = (TextView) v.findViewById(R.id.total);
-        averageView = (TextView) v.findViewById(R.id.average);
 
-        pg = (PieChart) v.findViewById(R.id.graph);
+        if (getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT) {
+            stepsView = (TextView) v.findViewById(R.id.steps);
+            totalView = (TextView) v.findViewById(R.id.total);
+            averageView = (TextView) v.findViewById(R.id.average);
 
-        // slice for the steps taken today
-        sliceCurrent = new PieModel("", 0, Color.parseColor("#99CC00"));
-        pg.addPieSlice(sliceCurrent);
+            pg = (PieChart) v.findViewById(R.id.graph);
 
-        // slice for the "missing" steps until reaching the goal
-        sliceGoal = new PieModel("", Fragment_Settings.DEFAULT_GOAL, Color.parseColor("#CC0000"));
-        pg.addPieSlice(sliceGoal);
+            // slice for the steps taken today
+            sliceCurrent = new PieModel("", 0, Color.parseColor("#99CC00"));
+            pg.addPieSlice(sliceCurrent);
 
-        pg.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(final View view) {
-                showSteps = !showSteps;
-                stepsDistanceChanged();
-            }
-        });
+            // slice for the "missing" steps until reaching the goal
+            sliceGoal = new PieModel("", Fragment_Settings.DEFAULT_GOAL, Color.parseColor("#CC0000"));
+            pg.addPieSlice(sliceGoal);
 
-        pg.setDrawValueInPie(false);
-        pg.setUsePieRotation(true);
-        pg.startAnimation();
+            pg.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(final View view) {
+                    showSteps = !showSteps;
+                    stepsDistanceChanged();
+                }
+            });
+
+            pg.setDrawValueInPie(false);
+            pg.setUsePieRotation(true);
+            pg.startAnimation();
+        }
         return v;
     }
 
@@ -165,20 +171,23 @@ public class Fragment_Overview extends Fragment implements SensorEventListener {
      * the pie graph as well as the pie and the bars graphs.
      */
     private void stepsDistanceChanged() {
-        if (showSteps) {
-            ((TextView) getView().findViewById(R.id.unit)).setText(getString(R.string.steps));
-        } else {
-            String unit = getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE)
-                    .getString("stepsize_unit", Fragment_Settings.DEFAULT_STEP_UNIT);
-            if (unit.equals("cm")) {
-                unit = "km";
-            } else {
-                unit = "mi";
-            }
-            ((TextView) getView().findViewById(R.id.unit)).setText(unit);
-        }
 
-        updatePie();
+        if (getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT) {
+            if (showSteps) {
+                ((TextView) getView().findViewById(R.id.unit)).setText(getString(R.string.steps));
+            } else {
+                String unit = getActivity().getSharedPreferences("pedometer", Context.MODE_PRIVATE)
+                        .getString("stepsize_unit", Fragment_Settings.DEFAULT_STEP_UNIT);
+                if (unit.equals("cm")) {
+                    unit = "km";
+                } else {
+                    unit = "mi";
+                }
+                ((TextView) getView().findViewById(R.id.unit)).setText(unit);
+            }
+
+            updatePie();
+        }
         updateBars();
     }
 
