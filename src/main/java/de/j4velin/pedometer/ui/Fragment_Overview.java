@@ -88,6 +88,19 @@ public class Fragment_Overview extends Fragment implements SensorEventListener {
             totalView = (TextView) v.findViewById(R.id.total);
             averageView = (TextView) v.findViewById(R.id.average);
 
+            totalView.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(final View v) {
+                    Dialog_Statistics.getDialog(getActivity(), since_boot).show();
+                }
+            });
+            averageView.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(final View v) {
+                    Dialog_Statistics.getDialog(getActivity(), since_boot).show();
+                }
+            });
+
             pg = (PieChart) v.findViewById(R.id.graph);
 
             // slice for the steps taken today
