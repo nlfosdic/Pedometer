@@ -149,7 +149,7 @@ public class Fragment_Overview extends Fragment implements SensorEventListener {
             SensorManager sm =
                     (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
             Sensor sensor = sm.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-            /*if (sensor == null) {
+            if (sensor == null) {
                 new AlertDialog.Builder(getActivity()).setTitle(R.string.no_sensor)
                         .setMessage(R.string.no_sensor_explain)
                         .setOnDismissListener(new DialogInterface.OnDismissListener() {
@@ -166,7 +166,7 @@ public class Fragment_Overview extends Fragment implements SensorEventListener {
                         }).create().show();
             } else {
                 sm.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI, 0);
-            }*/
+            }
         }
 
         since_boot -= pauseDifference;
@@ -389,17 +389,6 @@ public class Fragment_Overview extends Fragment implements SensorEventListener {
                 barChart.addBar(bm);
             }
         }
-        /*if (barChart.getData().size() > 0) {
-            barChart.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(final View v) {
-                    Dialog_Statistics.getDialog(getActivity(), since_boot).show();
-                }
-            });
-            barChart.startAnimation();
-        } else {
-            barChart.setVisibility(View.GONE);
-        }*/
         if (barChart.getData().size() > 0) {
             barChart.setOnClickListener(new OnClickListener() {
                 @Override
@@ -414,8 +403,9 @@ public class Fragment_Overview extends Fragment implements SensorEventListener {
     }
 
 
-
-
+    /**
+     * Show all previous days on bar chart, changing the color for different months
+     */
     private void updateBarsHistory() {
         SimpleDateFormat df = new SimpleDateFormat("", Locale.getDefault());
         BarChart barChart = (BarChart) getView().findViewById(R.id.bargraph);
